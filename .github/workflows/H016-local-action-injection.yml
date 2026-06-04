@@ -1,0 +1,19 @@
+# LAB VICTIM (H016) — local action injection. The workflow checks out the PR head
+# and runs a LOCAL action by path. The action does not exist in the base repo, so a
+# PR can add it — and the checkout makes the attacker's version the one that runs.
+name: Lab Local Action
+
+on:
+  pull_request_target:
+    types: [opened, synchronize]
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    env:
+      LAB_SECRET: ${{ secrets.LAB_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}   # attacker-controlled tree
+      - uses: ./.github/actions/greet                       # missing in base → PR adds it
